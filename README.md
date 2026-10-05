@@ -1,6 +1,6 @@
 # Vortexia Prospector — manual de uso
 
-[![Descargar para Windows](https://img.shields.io/badge/Descargar_para_Windows-Vortexia_Prospector-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/rznavarro/buscadorpro/releases/latest/download/VortexiaProspector-Windows.zip)
+[![Descargar para Windows](https://img.shields.io/badge/Descargar_para_Windows-Vortexia_Prospector-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/rznavarro/buscadorpro/raw/main/descargas/VortexiaProspector-Windows.zip)
 
 Encuentra negocios locales en Google Maps que **tienen página web** y un **WhatsApp** (o un
 celular para probar), revisa su web y te dice qué problemas tiene, para que les ofrezcas un

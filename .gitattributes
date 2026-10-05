@@ -1,9 +1,12 @@
 * text=auto
 # Los .bat deben tener fin de línea de Windows (CRLF) o cmd los lee mal.
 *.bat text eol=crlf
+*.ps1 text eol=crlf
+*.zip binary
 
 # Lo que no va en la descarga para Windows (git archive): solo para desarrollo.
 tests/ export-ignore
+tools/ export-ignore
+descargas/ export-ignore
 CLAUDE.md export-ignore
-.github/ export-ignore
 .gitattributes export-ignore
