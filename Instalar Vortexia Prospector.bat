@@ -2,24 +2,30 @@
 setlocal
 rem Instala Vortexia Prospector en esta carpeta: uv, Python, las librerias, el navegador
 rem del programa y un acceso directo en el Escritorio. Se puede ejecutar de nuevo sin problema.
-chcp 65001 >nul
+rem Con --desde-instalador (lo usa VortexiaProspector-Setup.exe) no crea accesos directos
+rem ni pregunta nada: de eso se encarga el instalador.
 title Instalar Vortexia Prospector
 cd /d "%~dp0"
+set "DESDE_INSTALADOR="
+if /i "%~1"=="--desde-instalador" set "DESDE_INSTALADOR=1"
 
 echo.
 echo  ===== Instalando Vortexia Prospector =====
 echo  La primera vez tarda varios minutos: descarga Python, las librerias y un navegador.
-echo  No cierres esta ventana hasta que diga "Instalacion lista".
+echo  No cierres esta ventana: se cierra sola cuando termina.
 echo.
+if defined DESDE_INSTALADOR goto :check_uv
 echo "%~dp0" | find /i "OneDrive" >nul && (
   echo  AVISO: esta carpeta esta dentro de OneDrive. Funciona, pero es mejor moverla fuera
   echo  ^(por ejemplo a C:\VortexiaProspector^) para que OneDrive no bloquee archivos.
   echo.
 )
 
+:check_uv
+
 call :find_uv
 if not defined UV (
-  echo [1/4] Instalando uv ^(el administrador de Python^)...
+  echo [1/3] Instalando uv ^(el administrador de Python^)...
   winget install --id=astral-sh.uv -e --accept-source-agreements --accept-package-agreements
   call :find_uv
 )
@@ -33,23 +39,27 @@ if not defined UV (
   echo  No se pudo instalar uv. Revisa tu conexion a internet y vuelve a intentarlo.
   goto :fail
 )
-echo [1/4] uv listo.
+echo [1/3] uv listo.
 
-echo [2/4] Instalando Python y las librerias del programa...
-"%UV%" sync
+echo [2/3] Instalando Python y las librerias del programa...
+"%UV%" sync --no-dev
 if errorlevel 1 goto :fail
 
-echo [3/4] Instalando el navegador del programa ^(Chromium^)...
-"%UV%" run playwright install chromium
+echo [3/3] Instalando el navegador que usa para buscar en Google Maps ^(Chromium^)...
+"%UV%" run --no-dev playwright install chromium
 if errorlevel 1 goto :fail
-
-echo [4/4] Creando el acceso directo "Vortexia Prospector" en el Escritorio...
 if not exist ".env" copy ".env.example" ".env" >nul
+
+if defined DESDE_INSTALADOR exit /b 0
+
+echo Creando el acceso directo "Vortexia Prospector" en el Escritorio...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$desktop = [Environment]::GetFolderPath('Desktop');" ^
   "$link = (New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $desktop 'Vortexia Prospector.lnk'));" ^
-  "$link.TargetPath = Join-Path '%~dp0' 'Abrir Vortexia Prospector.bat';" ^
+  "$link.TargetPath = Join-Path '%~dp0' '.venv\Scripts\pythonw.exe';" ^
+  "$link.Arguments = '-m app.desktop';" ^
   "$link.WorkingDirectory = '%~dp0';" ^
+  "$link.IconLocation = (Join-Path '%~dp0' 'app\web\static\vortexia.ico') + ',0';" ^
   "$link.Description = 'Abre Vortexia Prospector';" ^
   "$link.Save()"
 
@@ -59,7 +69,7 @@ echo  Para usar el programa: doble clic en "Vortexia Prospector" en tu Escritori
 echo.
 set "RESP="
 set /p RESP=" Quieres abrirlo ahora? (S/N): "
-if /i "%RESP%"=="S" start "" "%~dp0Abrir Vortexia Prospector.bat"
+if /i "%RESP%"=="S" start "" "%~dp0.venv\Scripts\pythonw.exe" -m app.desktop
 exit /b 0
 
 :find_uv

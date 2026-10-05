@@ -1,6 +1,6 @@
 # Vortexia Prospector — manual de uso
 
-[![Descargar para Windows](https://img.shields.io/badge/Descargar_para_Windows-Vortexia_Prospector-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/rznavarro/buscadorpro/raw/main/descargas/VortexiaProspector-Windows.zip)
+[![Descargar para Windows](https://img.shields.io/badge/Descargar_para_Windows-Vortexia_Prospector-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/rznavarro/buscadorpro/raw/main/descargas/VortexiaProspector-Setup.exe)
 
 Encuentra negocios locales en Google Maps que **tienen página web** y un **WhatsApp** (o un
 celular para probar), revisa su web y te dice qué problemas tiene, para que les ofrezcas un
@@ -11,35 +11,40 @@ rediseño. Todo corre en tu computador: nada se publica ni se envía a nadie. El
 
 ## 0. Instalar (solo la primera vez)
 
-Necesitas Windows 10 u 11 con internet.
+Necesitas Windows 10 u 11 (64 bits) con internet. No pide permisos de administrador.
 
-1. Pulsa el botón **Descargar para Windows** de arriba. Se descarga `VortexiaProspector-Windows.zip`.
-2. Descomprímelo **fuera de OneDrive**, por ejemplo directamente en `C:\`. Se crea la
-   carpeta `C:\VortexiaProspector` (en este manual la llamamos "la carpeta del programa").
-3. Abre esa carpeta y haz doble clic en **Instalar Vortexia Prospector.bat**.
-   - Si Windows muestra "Windows protegió su PC", pulsa **Más información** → **Ejecutar de todas formas**.
-   - La primera vez tarda varios minutos: descarga Python, las librerías y un navegador. No
-     cierres la ventana hasta que diga "Instalacion lista".
-4. Al terminar, queda un acceso directo **Vortexia Prospector** en tu Escritorio.
+1. Pulsa el botón **Descargar para Windows** de arriba. Se descarga `VortexiaProspector-Setup.exe`.
+2. Ábrelo con doble clic.
+   - Si Windows muestra "Windows protegió su PC", pulsa **Más información** → **Ejecutar de
+     todas formas** (pasa con los programas que no compraron un certificado de firma).
+3. Pulsa **Siguiente** e **Instalar**. Se abre una ventana negra que descarga Python, las
+   librerías y el navegador del programa: la primera vez tarda varios minutos y se cierra sola.
+4. Al final, deja marcado **Abrir Vortexia Prospector** y pulsa **Finalizar**.
 
-**Actualizar a una versión nueva:** descarga el zip nuevo, descomprímelo en el mismo lugar
-(reemplazando los archivos) y vuelve a ejecutar el instalador. Tus leads y contactados
-(`data\prospector.db`) no vienen en el zip, así que no se pierden.
+Queda instalado como cualquier programa: lo encuentras en el **menú Inicio** (escribe
+"Vortexia") y en el **Escritorio**, con su ícono. Se instala en
+`%LOCALAPPDATA%\Programs\Vortexia Prospector` (en este manual, "la carpeta del programa").
+
+**Actualizar a una versión nueva:** descarga el instalador nuevo y ábrelo; se instala encima.
+Tus leads, contactados y configuración (`data` y `.env`) no se tocan.
+
+**Desinstalar:** Configuración de Windows → Aplicaciones → Vortexia Prospector → Desinstalar.
+Tu carpeta `data` (leads y contactados) se conserva, por si lo vuelves a instalar.
+
+> ¿Prefieres la versión portátil (sin instalador)? Descarga
+> [VortexiaProspector-Windows.zip](https://github.com/rznavarro/buscadorpro/raw/main/descargas/VortexiaProspector-Windows.zip),
+> descomprímelo fuera de OneDrive y haz doble clic en **Instalar Vortexia Prospector.bat**.
 
 ---
 
 ## 1. Abrir el programa
 
-**Doble clic en "Vortexia Prospector" en tu Escritorio.**
+**Búscalo en el menú Inicio (escribe "Vortexia") o haz doble clic en su ícono del Escritorio.**
 
-- Se abre una **ventana negra** y, unos segundos después, tu navegador con la página del
-  programa (`http://127.0.0.1:8000`).
-- **No cierres la ventana negra mientras lo usas**: es el programa funcionando. Para
-  cerrarlo, cierra esa ventana.
-- Si haces doble clic cuando ya estaba abierto, solo se abre la página de nuevo (no pasa nada malo).
-
-Si el acceso directo no está, haz doble clic en **Abrir Vortexia Prospector.bat**, dentro
-de la carpeta del programa (o vuelve a ejecutar el instalador para recrear el acceso directo).
+- Se abre en **su propia ventana**, como una aplicación.
+- Para cerrarlo, **cierra esa ventana**: el programa se cierra solo.
+- Si lo abres cuando ya estaba abierto, solo se abre otra ventana (no pasa nada malo).
+- Si prefieres usarlo en tu navegador, también está en `http://127.0.0.1:8000` mientras está abierto.
 
 ---
 
@@ -195,9 +200,9 @@ El archivo `.env` es privado: nunca lo compartas (ahí va tu clave de IA).
 | "Google bloqueó la búsqueda" | Esperar una hora o más. Si pasa seguido, subir las pausas (sección 7) |
 | "Se cerró la ventana del navegador" | No cierres la ventana de Chromium mientras busca. Vuelve a buscar: lo encontrado quedó guardado |
 | "Parece que no hay conexión a internet" | Revisa tu internet y vuelve a buscar |
-| "Falta instalar el navegador del programa" | Vuelve a ejecutar **Instalar Vortexia Prospector.bat** |
-| "Todavía no está instalado en esta carpeta" | Ejecuta **Instalar Vortexia Prospector.bat** (sección 0) |
-| La página no abre | Cierra la ventana negra y vuelve a hacer doble clic en el acceso directo |
+| "Falta instalar el navegador del programa" | Vuelve a ejecutar el instalador (sección 0): se instala encima sin borrar tus datos |
+| Un aviso de Windows dice que no pudo abrirse | Ciérralo, espera unos segundos y vuelve a abrirlo. Si se repite, abre el registro del día en `data\logs` (sección 9) |
+| No se abre nada | Vuelve a ejecutar el instalador. Si sigue igual, abre **Abrir Vortexia Prospector.bat** (en la carpeta del programa): muestra el error en una ventana negra |
 | Un negocio quedó sin revisar | Pulsa **Re-analizar web** en su informe, o **Revisar webs pendientes** en la lista |
 
 Las webs que fallan un momento (no responden, error del servidor) se reintentan solas una
@@ -207,7 +212,8 @@ vez. Una web que tarda demasiado (más de 2 minutos) se corta y la búsqueda sig
 
 ## 9. Tus datos y copias de seguridad
 
-Todo está en la carpeta `data`, dentro de la carpeta del programa:
+Todo está en la carpeta `data`, dentro de la carpeta del programa (instalado:
+`%LOCALAPPDATA%\Programs\Vortexia Prospector\data`; pega esa ruta en la barra del Explorador de archivos):
 
 - `prospector.db`: tus leads, búsquedas, contactados y análisis.
 - `screenshots`: las capturas de las webs (unos 0,7 MB por web).

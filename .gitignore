@@ -9,3 +9,6 @@ data/*
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# Instalador de Windows (se fabrica con tools/armar-instalador.py)
+build/

@@ -10,7 +10,7 @@ if not defined UV goto :not_installed
 if not exist ".venv\Scripts\python.exe" goto :not_installed
 
 echo Abriendo Vortexia Prospector en tu navegador... (no cierres esta ventana mientras lo usas)
-"%UV%" run python -m app.cli serve %*
+"%UV%" run --no-dev python -m app.cli serve %*
 echo.
 echo Vortexia Prospector se detuvo. Si ves un error arriba, sacale una captura.
 pause

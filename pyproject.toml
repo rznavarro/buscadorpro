@@ -1,6 +1,6 @@
 [project]
 name = "vortexia-prospector"
-version = "0.1.0"
+version = "1.0.0"
 description = "Agente de investigación comercial para Vortexia: encuentra negocios en Google Maps y analiza su presencia web."
 requires-python = ">=3.12,<3.13"
 dependencies = [
