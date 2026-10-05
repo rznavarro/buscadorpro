@@ -1,0 +1,147 @@
+{% if lead.discarded %}
+<tr class="discarded" id="lead-{{ lead.id }}">
+  <td colspan="4">
+    <span class="name">{{ lead.name }}</span> — descartado: el WhatsApp no existe. No volverá a aparecer.
+  </td>
+  <td>
+    <button class="btn small" hx-post="/negocio/{{ lead.id }}/deshacer" hx-target="#lead-{{ lead.id }}" hx-swap="outerHTML">↶ Deshacer</button>
+  </td>
+</tr>
+{% else %}
+<tr id="lead-{{ lead.id }}">
+  <td>
+    <a class="name" href="/negocio/{{ lead.id }}" title="Ver el informe completo">{{ lead.name }}</a>
+    <div class="sub">
+      {% if lead.category %}{{ lead.category }}{% endif %}{% if lead.city %} · {{ lead.city }}{% endif %}
+    </div>
+    {% if lead.phone %}
+      <div class="sub">Tel: {{ lead.phone }}
+        <button class="btn small copy" type="button" data-copy="{{ lead.phone }}" title="Copiar el teléfono">Copiar</button>
+      </div>
+    {% endif %}
+    {% if lead.query %}<div class="sub" title="Búsqueda que lo encontró">🔎 {{ lead.query }}</div>{% endif %}
+    <a class="sub" href="/negocio/{{ lead.id }}">Ver informe →</a>
+  </td>
+
+  <td>
+    <div class="stack">
+      {% if lead.whatsapp_state == "confirmado" %}
+        <span class="badge b-green" title="{{ lead.confidence_reason or '' }}">✓ Existe · confirmado por ti</span>
+      {% elif lead.whatsapp_state == "verificado" %}
+        <span class="badge {% if lead.confidence == 'ALTA' %}b-green{% else %}b-blue{% endif %}" title="{{ lead.confidence_reason or '' }}">
+          Verificado · confianza {{ lead.confidence | lower }}
+        </span>
+        {% if lead.confidence_reason %}<span class="sub">{{ lead.confidence_reason }}</span>{% endif %}
+      {% elif lead.whatsapp_state == "por_probar" %}
+        <span class="badge b-amber">Por probar · es un celular</span>
+      {% endif %}
+      {% if lead.whatsapp_number %}<span>{{ lead.whatsapp_number }}</span>{% endif %}
+      <div class="row-actions">
+        {% if lead.whatsapp_state in ("confirmado", "verificado") %}
+          <a class="btn wa" href="{{ lead.whatsapp_url }}" target="_blank" rel="noopener">Abrir WhatsApp</a>
+        {% elif lead.whatsapp_state == "por_probar" %}
+          <a class="btn try" href="{{ lead.whatsapp_url }}" target="_blank" rel="noopener">Probar WhatsApp</a>
+        {% endif %}
+        {% if lead.whatsapp_state != "confirmado" %}
+          <button class="btn small ok" hx-post="/negocio/{{ lead.id }}/existe" hx-target="#lead-{{ lead.id }}" hx-swap="outerHTML"
+                  title="Abriste el chat y el número tiene WhatsApp">✓ Existe</button>
+        {% endif %}
+        <button class="btn small no" hx-post="/negocio/{{ lead.id }}/no-existe" hx-target="#lead-{{ lead.id }}" hx-swap="outerHTML"
+                title="El número no tiene WhatsApp: el lead se descarta">✗ No existe</button>
+      </div>
+      {% if lead.broken_button %}
+        <span class="badge b-red" title="Un botón de WhatsApp de su web o Linktree no funciona">Su botón de WhatsApp está roto</span>
+      {% endif %}
+    </div>
+  </td>
+
+  <td>
+    <div class="stack">
+      {% set ws = lead.website_status %}
+      {% if ws == "OK" %}<span class="badge b-green">Web OK</span>
+      {% elif ws == "CAIDO" %}<span class="badge b-red">Web caída</span>
+      {% elif ws == "SIN_WEB" %}<span class="badge b-grey">Sin web</span>
+      {% elif ws == "SOLO_REDES" %}<span class="badge b-amber">Solo redes</span>
+      {% elif ws == "BLOQUEADO" %}<span class="badge b-grey">No se pudo revisar</span>
+      {% else %}<span class="badge b-grey">Por verificar</span>{% endif %}
+      {% if lead.website %}
+        <a href="{{ lead.website }}" target="_blank" rel="noopener">{{ lead.website | replace("https://", "") | replace("http://", "") | truncate(40, True, "…") }}</a>
+      {% endif %}
+      {% if lead.website_reason %}<span class="sub">{{ lead.website_reason }}</span>{% endif %}
+
+      <div class="row-actions">
+        {% if lead.score is not none %}
+          <span class="badge {% if lead.score < 50 %}b-red{% elif lead.score < 70 %}b-amber{% else %}b-green{% endif %}">Puntaje {{ lead.score }}/100</span>
+        {% endif %}
+        {% if lead.opportunity %}
+          <span class="badge {% if lead.opportunity == 'ALTA' %}b-green{% elif lead.opportunity == 'MEDIA' %}b-blue{% else %}b-grey{% endif %}"
+                title="Oportunidad de venta para Vortexia">Oportunidad {{ lead.opportunity | lower }}</span>
+        {% endif %}
+      </div>
+      {% set reviewing = review_status(lead.id) %}
+      {% if reviewing == "revisando" %}<span class="sub"><span class="spinner"></span> Revisando la web a fondo…</span>
+      {% elif reviewing == "en_cola" %}<span class="sub">En cola para revisar la web…</span>
+      {% elif lead.review_pending %}<span class="sub">Revisión a fondo de la web pendiente…</span>{% endif %}
+
+      {% if lead.findings %}
+        <ul class="findings">
+          {% for finding in lead.findings[:3] %}
+            <li class="sev-{{ finding.gravedad }}">{{ finding.titulo }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if lead.findings | length > 3 or lead.screenshots or lead.problems or lead.review_error %}
+        <details class="more">
+          <summary>
+            {% if lead.findings | length > 3 %}Ver los {{ lead.findings | length }} problemas{% else %}Ver detalle{% endif %}
+            {%- if lead.screenshots %} y las capturas{% endif %}
+          </summary>
+          {% for finding in lead.findings %}
+            <div class="finding">
+              <div class="sev-{{ finding.gravedad }}"><b>{{ finding.titulo }}</b></div>
+              {% if finding.detalle %}<div class="sub">{{ finding.detalle }}</div>{% endif %}
+              {% if finding.evidencia %}<div class="evidence">{{ finding.evidencia | reject("equalto", "") | join(" · ") }}</div>{% endif %}
+            </div>
+          {% endfor %}
+          {% if lead.problems %}
+            <div class="finding"><b>Según la IA</b></div>
+            {% for problem in lead.problems %}
+              <div class="finding"><div><b>{{ problem.titulo }}</b></div><div class="sub">{{ problem.impacto }}</div>
+                <div class="evidence">{{ problem.evidencia | join(" · ") }}</div></div>
+            {% endfor %}
+            {% if lead.opportunities %}
+              <div class="finding"><b>Oportunidades para Vortexia</b>
+                <ul>{% for item in lead.opportunities %}<li>{{ item.titulo }}: {{ item.descripcion }}</li>{% endfor %}</ul></div>
+            {% endif %}
+            {% if lead.strengths %}
+              <div class="finding"><b>Puntos fuertes</b>
+                <ul>{% for item in lead.strengths %}<li>{{ item.titulo }}</li>{% endfor %}</ul></div>
+            {% endif %}
+          {% endif %}
+          {% if lead.review_error %}<div class="sub">⚠ {{ lead.review_error }}</div>{% endif %}
+          {% if lead.screenshots %}
+            <div class="row-actions" style="margin-top:6px">
+              {% for label, path in lead.screenshots.items() %}
+                <a class="btn small" href="/capturas/{{ path | replace('screenshots/', '', 1) }}" target="_blank" rel="noopener">📷 {{ label | replace("_", " ") }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </details>
+      {% endif %}
+    </div>
+  </td>
+
+  <td>
+    {% if lead.rating %}<div>{{ lead.rating | coma }} ★</div>{% endif %}
+    {% if lead.reviews %}<div class="sub">{{ lead.reviews }} {{ "reseña" if lead.reviews == 1 else "reseñas" }}</div>{% else %}<div class="sub">sin reseñas</div>{% endif %}
+  </td>
+
+  <td>
+    <div class="stack">
+      <a href="{{ lead.maps_url }}" target="_blank" rel="noopener">Maps</a>
+      {% if lead.instagram %}<a href="{{ lead.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+      {% if lead.facebook %}<a href="{{ lead.facebook }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+    </div>
+  </td>
+</tr>
+{% endif %}

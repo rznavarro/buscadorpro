@@ -1,0 +1,11 @@
+# Secretos y datos locales
+.env
+data/*
+# La lista de comunas es configuración, no datos: se versiona.
+!data/comunas.json
+
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+{% block content %}
+  <p class="sub"><a href="javascript:history.back()">← Volver</a> · <a href="/">Leads de hoy</a></p>
+
+  {% if business.duplicate_reason %}
+    <div class="notice">Repetido (no aparece en tus leads): {{ business.duplicate_reason }}</div>
+  {% endif %}
+  {% if business.discarded_at %}
+    <div class="notice">Descartado: {{ business.discard_reason or "lo marcaste como descartado" }}.</div>
+  {% endif %}
+
+  {# --- Resumen (sección 10) --- #}
+  <section class="panel report-head">
+    <h2>{{ business.business_name }}</h2>
+    <div class="sub">
+      {% if business.category %}{{ business.category }}{% endif %}
+      {% if business.address %} · {{ business.address }}{% endif %}
+      {% if lead.query %} · encontrado con 🔎 “{{ lead.query }}”{% endif %}
+    </div>
+
+    <dl class="kv">
+      <dt>Web</dt>
+      <dd>
+        {% set ws = lead.website_status %}
+        {% if business.website %}
+          <a href="{{ business.website }}" target="_blank" rel="noopener">{{ business.website | replace("https://", "") | replace("http://", "") }}</a>
+          <a class="btn small" href="{{ business.website }}" target="_blank" rel="noopener">Abrir web</a>
+        {% endif %}
+        {% if ws == "OK" %}<span class="badge b-green">Abre bien</span>
+        {% elif ws == "CAIDO" %}<span class="badge b-red">Caída</span>
+        {% elif ws == "SIN_WEB" %}<span class="badge b-grey">Sin web propia</span>
+        {% elif ws == "SOLO_REDES" %}<span class="badge b-amber">Solo redes</span>
+        {% elif ws == "BLOQUEADO" %}<span class="badge b-grey">No se pudo revisar</span>
+        {% else %}<span class="badge b-grey">Por verificar</span>{% endif %}
+        {% if lead.website_reason %}<div class="sub">{{ lead.website_reason }}</div>{% endif %}
+      </dd>
+
+      <dt>WhatsApp</dt>
+      <dd>
+        {% if lead.whatsapp_state in ("verificado", "confirmado") %}
+          <span>{{ lead.whatsapp_url }}</span>
+          <a class="btn wa" href="{{ lead.whatsapp_url }}" target="_blank" rel="noopener">ABRIR WHATSAPP</a>
+          {% if lead.whatsapp_state == "confirmado" %}<span class="badge b-green">✓ Existe · confirmado por ti</span>
+          {% else %}<span class="badge {% if lead.confidence == 'ALTA' %}b-green{% else %}b-blue{% endif %}">Verificado · confianza {{ lead.confidence | lower }}</span>{% endif %}
+          {% if lead.confidence_reason %}<div class="sub">{{ lead.confidence_reason }}</div>{% endif %}
+        {% else %}
+          <span class="badge b-grey">No confirmado</span>
+          {% if business.phone_raw %}
+            <span>Teléfono: {{ business.phone_raw }}</span>
+            <button class="btn small copy" type="button" data-copy="{{ business.phone_raw }}">Copiar teléfono</button>
+          {% endif %}
+          {% if lead.whatsapp_state == "por_probar" %}
+            <a class="btn try" href="{{ lead.whatsapp_url }}" target="_blank" rel="noopener">Probar WhatsApp</a>
+            <div class="sub">No publica WhatsApp, pero el teléfono es un celular: pruébalo y marca si existe.</div>
+          {% endif %}
+        {% endif %}
+        {% if lead.broken_button %}<div><span class="badge b-red">Su botón de WhatsApp está roto</span></div>{% endif %}
+        {% if business.whatsapp_multiple_numbers %}<div class="sub">⚠ Publica varios números distintos: revisa la lista de abajo.</div>{% endif %}
+        {% if not business.discarded_at and not business.duplicate_reason and lead.whatsapp_state != "sin_whatsapp" %}
+          <div class="row-actions" style="margin-top:6px">
+            {% if lead.whatsapp_state != "confirmado" %}
+              <button class="btn small ok" hx-post="/negocio/{{ business.id }}/existe" hx-swap="none"
+                      hx-on::after-request="location.reload()">✓ Existe</button>
+            {% endif %}
+            <button class="btn small no" hx-post="/negocio/{{ business.id }}/no-existe" hx-swap="none"
+                    hx-on::after-request="location.reload()">✗ No existe</button>
+          </div>
+        {% elif business.discarded_at %}
+          <button class="btn small" hx-post="/negocio/{{ business.id }}/deshacer" hx-swap="none"
+                  hx-on::after-request="location.reload()">↶ Deshacer descarte</button>
+        {% endif %}
+      </dd>
+
+      <dt>Google Maps</dt>
+      <dd><a class="btn small" href="{{ business.google_maps_url }}" target="_blank" rel="noopener">Abrir en Maps</a></dd>
+
+      {% if business.instagram or business.facebook %}
+        <dt>Redes</dt>
+        <dd>
+          {% if business.instagram %}<a href="{{ business.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+          {% if business.facebook %}<a href="{{ business.facebook }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+        </dd>
+      {% endif %}
+
+      <dt>Rating</dt>
+      <dd>
+        {% if business.rating %}{{ business.rating | coma }} ★{% else %}sin rating{% endif %}
+        · {{ business.review_count or 0 }} {{ "reseña" if business.review_count == 1 else "reseñas" }}
+      </dd>
+
+      <dt>Web score</dt>
+      <dd>
+        {% if lead.score is not none %}
+          <span class="score {% if lead.score < 50 %}b-red{% elif lead.score < 70 %}b-amber{% else %}b-green{% endif %}">{{ lead.score }}/100</span>
+        {% elif analysis and analysis.model_name %}
+          <span class="sub">Sin score total: {{ analysis.error or "la IA no puntuó todos los parámetros" }}</span>
+        {% elif business.website and lead.website_status == "OK" %}
+          <span class="sub">Sin score: el puntaje total lo da la IA{% if not ai_enabled %} (apagada){% endif %}. Abajo están los problemas medidos sin IA.</span>
+        {% else %}
+          <span class="sub">—</span>
+        {% endif %}
+        {% if lead.opportunity %}
+          <span class="badge {% if lead.opportunity == 'ALTA' %}b-green{% elif lead.opportunity == 'MEDIA' %}b-blue{% else %}b-grey{% endif %}">Oportunidad {{ lead.opportunity | lower }}</span>
+        {% endif %}
+      </dd>
+    </dl>
+    {% include "_revision.html" %}
+  </section>
+
+  {# --- Problemas, oportunidades y puntos fuertes --- #}
+  <section class="panel">
+    <h3>Principales problemas</h3>
+    {% if lead.problems %}
+      <ol class="report-list">
+        {% for problem in lead.problems %}
+          <li><b>{{ problem.titulo }}</b>
+            <div class="sub">{{ problem.impacto }}</div>
+            {% if problem.evidencia %}<details class="more"><summary>Evidencia</summary><div class="evidence">{{ problem.evidencia | join(" · ") }}</div></details>{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+      <p class="sub">Según la IA. Abajo, los problemas medidos automáticamente.</p>
+    {% endif %}
+    {% if lead.findings %}
+      {% if lead.problems %}<h4>Medidos automáticamente</h4>{% endif %}
+      <ol class="report-list">
+        {% for finding in lead.findings %}
+          <li><b class="sev-{{ finding.gravedad }}">{{ finding.titulo }}</b>
+            <span class="badge b-grey">gravedad {{ finding.gravedad }}</span>
+            {% if finding.detalle %}<div class="sub">{{ finding.detalle }}</div>{% endif %}
+            {% if finding.evidencia %}<details class="more"><summary>Evidencia técnica</summary>
+              <div class="evidence">{{ finding.evidencia | reject("equalto", "") | join(" · ") }}</div></details>{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    {% elif not lead.problems %}
+      <p class="sub">{% if lead.review_pending %}La web todavía no se revisó a fondo: pulsa “Re-analizar web”.{% else %}No se detectaron problemas.{% endif %}</p>
+    {% endif %}
+
+    <h3>Oportunidades para Vortexia</h3>
+    {% if lead.opportunities %}
+      <ol class="report-list">
+        {% for item in lead.opportunities %}<li><b>{{ item.titulo }}</b><div class="sub">{{ item.descripcion }}</div></li>{% endfor %}
+      </ol>
+    {% else %}
+      <p class="sub">Las redacta la IA a partir de los problemas{% if not ai_enabled %} (apagada: se activa poniendo la clave en .env){% endif %}.</p>
+    {% endif %}
+
+    <h3>Puntos fuertes</h3>
+    {% if lead.strengths %}
+      <ol class="report-list">
+        {% for item in lead.strengths %}<li><b>{{ item.titulo }}</b>{% if item.evidencia %}<div class="evidence">{{ item.evidencia | join(" · ") }}</div>{% endif %}</li>{% endfor %}
+      </ol>
+    {% else %}
+      <p class="sub">Los detecta la IA{% if not ai_enabled %} (apagada){% endif %}.</p>
+    {% endif %}
+  </section>
+
+  {# --- Capturas --- #}
+  {% if analysis and analysis.screenshots %}
+    <section class="panel">
+      <h3>Capturas <span class="sub">({{ analysis.analyzed_at | hora }})</span></h3>
+      <div class="shots">
+        {% for label in ("escritorio", "celular") %}
+          {% if analysis.screenshots.get(label) %}
+            <figure>
+              <a href="{{ analysis.screenshots[label] | captura }}" target="_blank" rel="noopener">
+                <img src="{{ analysis.screenshots[label] | captura }}" alt="Captura en {{ label }}" loading="lazy" class="shot-{{ label }}"></a>
+              <figcaption class="sub">
+                {{ label | capitalize }}: primera pantalla
+                {% if analysis.screenshots.get(label ~ "_completa") %}
+                  · <a href="{{ analysis.screenshots[label ~ '_completa'] | captura }}" target="_blank" rel="noopener">página completa</a>
+                {% endif %}
+              </figcaption>
+            </figure>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {# --- Rúbrica de Vortexia --- #}
+  {% if analysis %}
+    <section class="panel">
+      <h3>Rúbrica de Vortexia <span class="sub">(versión {{ analysis.rubric_version or "—" }}{% if analysis.model_name %} · IA: {{ analysis.model_name }}{% endif %})</span></h3>
+      <table>
+        <thead><tr><th>#</th><th>Parámetro</th><th>Puntaje</th><th>Por qué</th></tr></thead>
+        <tbody>
+          {% for row in report.rubric %}
+            <tr>
+              <td>{{ row.id }}</td>
+              <td>{{ row.nombre }}<div class="sub">{{ "medido por código" if row.evalua == "codigo" else "lo evalúa la IA" }}</div></td>
+              <td style="white-space:nowrap">
+                {% if row.puntaje is not none %}<b>{{ row.puntaje }}</b>/10{% else %}<span class="sub">—</span>{% endif %}
+              </td>
+              <td>
+                {% if row.justificacion %}{{ row.justificacion }}{% elif row.evalua == "ia" %}<span class="sub">Sin puntaje: la IA {% if ai_enabled %}no lo puntuó con evidencia{% else %}está apagada{% endif %}.</span>{% endif %}
+                {% if row.evidencia %}<details class="more"><summary>Evidencia</summary><div class="evidence">{{ row.evidencia | join(" · ") }}</div></details>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    {# --- SEO local y checklist (no suman al score) --- #}
+    <section class="panel two-cols">
+      <div>
+        <h3>SEO local <span class="sub">(no suma al score)</span></h3>
+        <ul class="checks">
+          {% for item in report.seo %}
+            <li class="{{ 'yes' if item.ok else ('no' if item.ok is sameas false else 'unknown') }}">
+              <b>{{ item.nombre }}</b><div class="sub">{{ item.detalle }}</div></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h3>Checklist de información</h3>
+        <ul class="checks">
+          {% for item in report.checklist %}
+            <li class="{{ 'yes' if item.ok else ('no' if item.ok is sameas false else 'unknown') }}">
+              <b>{{ item.nombre }}</b><div class="sub">{{ item.detalle }}</div></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+  {% endif %}
+
+  {# --- Datos de Maps --- #}
+  {% if business.opening_hours or business.services or business.description or business.commune or business.city %}
+    <section class="panel">
+      <h3>Datos de su ficha de Google Maps</h3>
+      <dl class="kv">
+        {% if business.city or business.commune %}<dt>Ciudad / comuna</dt><dd>{{ [business.city, business.commune] | select | unique | join(" · ") }}</dd>{% endif %}
+        {% if business.description %}<dt>Descripción</dt><dd>{{ business.description }}</dd>{% endif %}
+        {% if business.services %}<dt>Servicios</dt><dd>{{ business.services | join(" · ") }}</dd>{% endif %}
+        {% if business.opening_hours %}
+          <dt>Horario</dt>
+          <dd>{% for day_name, hours in business.opening_hours.items() %}<div><span class="sub">{{ day_name }}:</span> {{ hours }}</div>{% endfor %}</dd>
+        {% endif %}
+      </dl>
+    </section>
+  {% endif %}
+
+  {# --- WhatsApp encontrados y fuente de cada dato --- #}
+  <section class="panel">
+    <h3>WhatsApp encontrados</h3>
+    {% if report.candidates %}
+      <table>
+        <thead><tr><th>Número</th><th>Dónde</th><th>Evidencia (el enlace tal cual)</th></tr></thead>
+        <tbody>
+          {% for c in report.candidates %}
+            <tr>
+              <td style="white-space:nowrap">{{ c.number or "sin número a la vista" }}{% if c.broken %} <span class="badge b-red">roto</span>{% endif %}</td>
+              <td>{{ c.source }} · {{ c.placement }}{% if c.page_url %}<div class="sub">{{ c.page_url }}</div>{% endif %}</td>
+              <td><div class="evidence">{{ c.evidence }}</div>{% if c.note %}<div class="sub">{{ c.note }}</div>{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="sub">No publica ningún enlace de WhatsApp (ni en Maps ni en su web).</p>
+    {% endif %}
+
+    <details class="more" style="margin-top:12px">
+      <summary>De dónde salió cada dato</summary>
+      <table style="margin-top:6px">
+        {% for row in report.sources %}<tr><td style="width:30%">{{ row.dato }}</td><td class="sub">{{ row.fuente }}</td></tr>{% endfor %}
+      </table>
+    </details>
+  </section>
+
+  {# --- Evidencia técnica plegada --- #}
+  {% if analysis %}
+    <section class="panel">
+      <details class="more">
+        <summary>Evidencia técnica de la última revisión ({{ analysis.analyzed_at | hora }})</summary>
+        {% set facts = report.facts %}
+        {% set page = facts.get("pagina") or {} %}
+        <dl class="kv" style="margin-top:8px">
+          <dt>URL revisada</dt><dd>{{ analysis.url_analyzed }}{% if analysis.final_url and analysis.final_url != analysis.url_analyzed %} → {{ analysis.final_url }}{% endif %}</dd>
+          <dt>HTTPS</dt><dd>{{ "sí" if facts.get("https") else "no" }}</dd>
+          {% if facts.get("escritorio") %}
+            <dt>Carga (escritorio)</dt>
+            <dd>{{ facts.escritorio.load_ms or "—" }} ms · {{ facts.escritorio.requests }} pedidos · {{ facts.escritorio.weight_kb }} KB
+              <span class="sub">(medición local, referencial)</span></dd>
+          {% endif %}
+          {% if analysis.psi_mobile_score is not none %}<dt>PageSpeed móvil</dt><dd>{{ analysis.psi_mobile_score }}/100</dd>{% endif %}
+          {% if page %}
+            <dt>Título</dt><dd>{{ page.get("title") or "(sin título)" }}</dd>
+            <dt>H1</dt><dd>{{ page.get("h1") | join(" · ") or "(ninguno)" }}</dd>
+            <dt>Constructor</dt><dd>{{ page.get("builders", []) | map(attribute="name") | join(", ") or "no detectado" }}</dd>
+            <dt>Copyright</dt><dd>{{ page.get("copyright_years", []) | join(", ") or "no aparece" }}</dd>
+          {% endif %}
+          <dt>Páginas revisadas</dt><dd>{{ facts.get("paginas_revisadas", []) | join(" · ") }}</dd>
+          <dt>Enlaces rotos</dt>
+          <dd>{{ facts.get("enlaces_rotos", []) | length }} de {{ facts.get("enlaces_revisados", 0) }} revisados
+            {% for link in facts.get("enlaces_rotos", []) %}<div class="evidence">{{ link.url }} — {{ link.reason }}</div>{% endfor %}</dd>
+          <dt>Imágenes rotas</dt><dd>{{ facts.get("imagenes_rotas", []) | length }} de {{ facts.get("imagenes_revisadas", 0) }} revisadas</dd>
+          {% if facts.get("notas") %}<dt>Notas</dt><dd>{{ facts.notas | join(" · ") }}</dd>{% endif %}
+        </dl>
+        <details class="more"><summary>Todos los datos medidos (JSON)</summary><pre class="evidence">{{ facts | tojson(indent=2) }}</pre></details>
+      </details>
+    </section>
+  {% endif %}
+
+  {% if report.history | length > 1 %}
+    <section class="panel">
+      <h3>Revisiones anteriores</h3>
+      <table>
+        {% for item in report.history %}
+          <tr>
+            <td>{{ item.analyzed_at | hora }}{% if loop.first %} <span class="badge b-blue">la que se muestra</span>{% endif %}</td>
+            <td>{% if item.score is not none %}{{ item.score }}/100{% else %}<span class="sub">sin score</span>{% endif %}</td>
+            <td>{{ item.findings }} problemas</td>
+            <td class="sub">{{ item.error or "" }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </section>
+  {% endif %}
+{% endblock %}

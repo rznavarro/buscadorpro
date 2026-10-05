@@ -1,0 +1,41 @@
+{% if job %}
+<section class="panel" id="progreso"
+  {% if running %}hx-get="/progreso" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}>
+  <div class="toolbar">
+    <div>
+      {% if running %}<span class="spinner"></span>{% endif %}
+      <strong>
+        {% if running %}Buscando: {% else %}Última búsqueda: {% endif %}“{{ job.query }}”
+      </strong>
+      {% if not running %}
+        {% set status = job.status | string %}
+        {% if status == "TERMINADA" %}<span class="badge b-green">Terminada</span>
+        {% elif status == "DETENIDA" %}<span class="badge b-amber">Detenida</span>
+        {% elif status == "BLOQUEADO" %}<span class="badge b-red">Google bloqueó la búsqueda</span>
+        {% else %}<span class="badge b-red">Falló</span>{% endif %}
+      {% endif %}
+    </div>
+    {% if running %}
+      <button class="btn no" hx-post="/detener" hx-target="#progreso" hx-swap="outerHTML"
+              {% if job.stop_requested %}disabled{% endif %}>■ Detener</button>
+    {% endif %}
+  </div>
+  <div class="counters">
+    <div><b>{{ job.leads }} / {{ job.target }}</b><span class="sub">leads nuevos</span></div>
+    <div><b>{{ job.reviewed }}</b><span class="sub">fichas revisadas</span></div>
+    <div><b>{{ job.skipped }}</b><span class="sub">ya vistos otro día (saltados)</span></div>
+    <div><b>{{ job.no_website }}</b><span class="sub">sin web o con web caída (saltados)</span></div>
+    <div><b>{{ job.duplicates }}</b><span class="sub">repetidos o ya contactados (saltados)</span></div>
+    {% if job.webs_total %}
+      <div><b>{{ job.webs_done }} / {{ job.webs_total }}</b><span class="sub">webs revisadas a fondo</span></div>
+    {% endif %}
+  </div>
+  <div>{{ job.message }}</div>
+  {% if job.status | string == "BLOQUEADO" %}
+    <p class="notice" style="margin-top:10px">Google mostró un captcha o un aviso de tráfico inusual. La búsqueda se detuvo sin intentar resolverlo. Espera un rato antes de volver a buscar.</p>
+  {% endif %}
+  {% if job.log %}
+    <div class="log">{% for line in job.log[-12:] | reverse %}{{ line }}<br>{% endfor %}</div>
+  {% endif %}
+</section>
+{% endif %}

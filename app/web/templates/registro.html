@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="panel">
+    <div class="toolbar">
+      <strong style="font-size:17px">Registro de hoy ({{ today | fecha }})</strong>
+      <span class="sub">Lo más nuevo arriba. Si algo falla, sácale una captura a esta página.</span>
+    </div>
+    <p class="sub">
+      Todo lo que hizo el programa hoy, con la hora. Las líneas con <span class="sev-alta">ERROR</span> o
+      <span class="sev-media">WARNING</span> traen el detalle técnico de lo que falló.
+      Los registros de los últimos 30 días están en la carpeta <code>data\logs</code> del programa.
+    </p>
+    {% if lines %}
+      <div class="log" style="max-height:none">
+        {% for line in lines %}
+          <div class="{% if '| ERROR' in line %}sev-alta{% elif '| WARNING' in line %}sev-media{% endif %}">{{ line }}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">Todavía no hay nada registrado hoy.</div>
+    {% endif %}
+  </section>
+{% endblock %}

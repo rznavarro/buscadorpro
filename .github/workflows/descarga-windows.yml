@@ -1,0 +1,33 @@
+# Arma el .zip para Windows y lo publica como una versión (Release) de GitHub.
+# Se ejecuta al subir una etiqueta de versión, por ejemplo: git tag v1.0.1 && git push origin v1.0.1
+name: Descarga para Windows
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Armar VortexiaProspector-Windows.zip
+        # git archive deja fuera lo marcado con export-ignore en .gitattributes (tests, notas de desarrollo)
+        # y respeta el fin de línea de Windows de los .bat.
+        run: git archive --format=zip --prefix=VortexiaProspector/ -o VortexiaProspector-Windows.zip "$GITHUB_REF_NAME"
+
+      - name: Publicar la versión
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" VortexiaProspector-Windows.zip --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" VortexiaProspector-Windows.zip \
+              --title "Vortexia Prospector $GITHUB_REF_NAME" \
+              --notes-file .github/notas-de-version.md
+          fi

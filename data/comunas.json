@@ -1,0 +1,31 @@
+{
+  "_nota": "Comunas que se buscan en el texto de cada web (sección 8.1). Agrega regiones o comunas aquí. Las 'ambiguas' también son palabras comunes, santos o nombres de calles: solo cuentan escritas con mayúscula inicial y si en la misma línea aparece 'comuna', 'sector', 'cobertura' o 'atendemos', u otra comuna no ambigua.",
+  "regiones": {
+    "Metropolitana de Santiago": [
+      "Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central",
+      "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana",
+      "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú",
+      "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura",
+      "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura",
+      "Puente Alto", "Pirque", "San José de Maipo",
+      "Colina", "Lampa", "Tiltil",
+      "San Bernardo", "Buin", "Calera de Tango", "Paine",
+      "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro",
+      "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"
+    ],
+    "Libertador General Bernardo O'Higgins": [
+      "Rancagua", "Codegua", "Coinco", "Coltauco", "Doñihue", "Graneros", "Las Cabras",
+      "Machalí", "Malloa", "Mostazal", "Olivar", "Peumo", "Pichidegua", "Quinta de Tilcoco",
+      "Rengo", "Requínoa", "San Vicente",
+      "Pichilemu", "La Estrella", "Litueche", "Marchigüe", "Navidad", "Paredones",
+      "San Fernando", "Chépica", "Chimbarongo", "Lolol", "Nancagua", "Palmilla", "Peralillo",
+      "Placilla", "Pumanque", "Santa Cruz"
+    ]
+  },
+  "ambiguas": [
+    "Independencia", "Colina", "La Granja", "El Bosque", "La Reina", "San Pedro", "El Monte",
+    "Olivar", "Las Cabras", "Graneros", "La Estrella", "Navidad", "Paredones", "Placilla",
+    "Santa Cruz", "San Vicente", "Recoleta", "Lampa", "Peumo", "Padre Hurtado", "San Bernardo",
+    "Providencia"
+  ]
+}

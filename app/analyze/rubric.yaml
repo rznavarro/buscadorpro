@@ -1,0 +1,135 @@
+# Rúbrica fija de Vortexia (sección 8.2 del CLAUDE.md).
+# Los parámetros y sus pesos son de Joaquín: NO cambiarlos sin su autorización explícita.
+# Si se cambia algo, subir `version` (queda guardada en cada análisis).
+version: "2026-10-04.1"
+
+escala: {minimo: 1, maximo: 10}  # cada parámetro; el score total es la suma (10–100)
+
+parametros:
+  - id: 1
+    clave: primera_impresion
+    nombre: "Primera impresión / Hero"
+    evalua: ia
+    se_basa_en: "Capturas de la primera pantalla en escritorio y celular."
+    tramos:
+      "1-3": "En 5 segundos no se entiende qué hace el negocio ni dónde atiende."
+      "4-6": "Se entiende, pero se ve genérico o desordenado."
+      "7-8": "Claro y atractivo."
+      "9-10": "Claro, atractivo, propuesta de valor evidente y llamado a la acción inmediato."
+
+  - id: 2
+    clave: identidad_visual
+    nombre: "Identidad visual propia (vs. plantilla genérica)"
+    evalua: ia
+    se_basa_en: "Capturas + plantilla o constructor detectado en los hechos."
+    tramos:
+      "1-3": "Plantilla genérica sin adaptar: textos o imágenes de relleno, colores y tipografía por defecto, sin logo propio."
+      "4-6": "Plantilla reconocible con logo y colores del negocio, pero sin personalidad propia."
+      "7-8": "Identidad coherente: logo, colores y tipografía propios aplicados en toda la página."
+      "9-10": "Identidad distintiva y profesional que diferencia al negocio de su competencia."
+
+  - id: 3
+    clave: portafolio
+    nombre: "Evidencia / portafolio de trabajo real"
+    evalua: ia
+    se_basa_en: "Capturas (fotos de trabajos reales vs. fotos de stock) + galerías y número de imágenes en los hechos."
+    tramos:
+      "1-3": "No muestra trabajos realizados, o solo fotos de stock / genéricas."
+      "4-6": "Algunas fotos reales, pocas o de baja calidad, sin contexto (qué se hizo, dónde)."
+      "7-8": "Galería de trabajos reales con buena calidad."
+      "9-10": "Casos reales bien presentados (antes/después, tipo de trabajo, comuna o cliente) que generan confianza."
+
+  - id: 4
+    clave: navegacion
+    nombre: "Navegación y claridad de menú"
+    evalua: ia
+    se_basa_en: "Ítems del menú en los hechos + capturas (menú en escritorio y celular)."
+    tramos:
+      "1-3": "Menú confuso, roto o inexistente; cuesta encontrar servicios o contacto."
+      "4-6": "Menú usable pero desordenado, con demasiados ítems o nombres poco claros."
+      "7-8": "Menú claro con servicios y contacto fáciles de encontrar."
+      "9-10": "Navegación muy clara y simple; en celular el contacto está siempre a un toque."
+
+  - id: 5
+    clave: velocidad
+    nombre: "Velocidad de carga"
+    evalua: codigo  # tabla fija de abajo; la IA nunca lo puntúa
+    se_basa_en: "PageSpeed móvil si hay clave; si no, el tiempo de carga medido (referencial)."
+
+  - id: 6
+    clave: responsive
+    nombre: "Responsive / mobile"
+    evalua: ia
+    se_basa_en: "Captura en celular + hechos: viewport, scroll horizontal, página 'alejada' en celular."
+    tramos:
+      "1-3": "En celular no está adaptada: se ve en miniatura, se sale de la pantalla o es casi inutilizable."
+      "4-6": "Adaptada, pero con problemas: textos o botones muy chicos, elementos cortados o desordenados."
+      "7-8": "Se ve bien en celular y se usa sin problemas."
+      "9-10": "Pensada primero para celular: rápida, cómoda y con el contacto siempre a mano."
+
+  - id: 7
+    clave: llamado_accion
+    nombre: "Llamado a la acción (CTA)"
+    evalua: ia
+    se_basa_en: "Hechos: botones de acción y WhatsApp/teléfono visibles en la primera pantalla, botones falsos, botón flotante + capturas."
+    tramos:
+      "1-3": "No hay forma clara de contactar al entrar, o los botones no funcionan."
+      "4-6": "Hay contacto, pero escondido, poco visible o solo al final de la página."
+      "7-8": "WhatsApp o teléfono visibles en la primera pantalla."
+      "9-10": "Llamado a la acción claro, repetido a lo largo de la página y con WhatsApp de un toque (por ejemplo, botón flotante)."
+
+  - id: 8
+    clave: confianza
+    nombre: "Prueba social / confianza"
+    evalua: ia
+    se_basa_en: "Hechos: testimonios, reseñas, años de experiencia, certificaciones (SEC), garantías + capturas."
+    tramos:
+      "1-3": "No hay ninguna señal de confianza."
+      "4-6": "Alguna señal aislada (por ejemplo, 'años de experiencia') sin respaldo visible."
+      "7-8": "Testimonios o reseñas reales y alguna credencial (certificación, garantía)."
+      "9-10": "Prueba social fuerte y verificable: reseñas de Google integradas, certificaciones visibles, garantías claras."
+
+  - id: 9
+    clave: enlaces
+    nombre: "Coherencia y funcionalidad de enlaces"
+    evalua: codigo  # tabla fija de abajo; la IA nunca lo puntúa
+    se_basa_en: "Errores = enlaces internos rotos + botones de WhatsApp rotos + botones que no llevan a ninguna parte."
+
+  - id: 10
+    clave: vigencia
+    nombre: "Actualización / vigencia del contenido"
+    evalua: ia
+    se_basa_en: "Hechos: año del copyright, señales de antigüedad + capturas y texto visible."
+    tramos:
+      "1-3": "Se ve abandonada: copyright de hace años, información o promociones vencidas, diseño muy anticuado."
+      "4-6": "Sin señales claras de mantenimiento reciente."
+      "7-8": "Contenido vigente y coherente con el negocio actual."
+      "9-10": "Claramente al día: contenido reciente, año actual, información actualizada."
+
+# Tablas fijas por código (sección 8.2)
+velocidad:
+  pagespeed: "round(psi / 10), mínimo 1"
+  # segundos de carga medidos → puntaje (la medición local es referencial)
+  por_tiempo:
+    - {menos_de: 1.5, puntaje: 10}
+    - {menos_de: 2.5, puntaje: 8}
+    - {menos_de: 4.0, puntaje: 6}
+    - {menos_de: 6.0, puntaje: 4}
+    - {menos_de: 9.0, puntaje: 2}
+  resto: 1
+
+enlaces:
+  # errores → puntaje
+  - {hasta: 0, puntaje: 10}
+  - {hasta: 1, puntaje: 8}
+  - {hasta: 3, puntaje: 6}
+  - {hasta: 6, puntaje: 4}
+  - {resto: true, puntaje: 2}
+
+# Nivel de oportunidad (sección 8.5)
+oportunidad:
+  alta_score_menor_a: 50
+  alta_rating_minimo: 4.3
+  alta_resenas_minimo: 20
+  media_score_desde: 50
+  baja_score_desde: 70

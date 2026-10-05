@@ -1,0 +1,93 @@
+{% if searches | length > 1 %}
+  <div class="chips sub">
+    Búsquedas:
+    <a class="chip {% if not search_query %}on{% endif %}" href="{{ url(search=None) }}">Todas</a>
+    {% for query in searches | map(attribute="query") | unique %}
+      <a class="chip {% if search_query == query %}on{% endif %}" href="{{ url(search=query) }}">{{ query }}</a>
+    {% endfor %}
+  </div>
+{% endif %}
+{% if all_count %}
+  <div class="chips sub">
+    Filtros:
+    {% for key, (label, help_text) in filters.items() %}
+      <a class="chip {% if key in active %}on{% endif %}" href="{{ url(toggle=key) }}" title="{{ help_text }}">{% if key in active %}✓ {% endif %}{{ label }}</a>
+    {% endfor %}
+    {% if active %}<a href="{{ url(clear=True) }}" class="sub">Quitar filtros</a>{% endif %}
+  </div>
+{% endif %}
+
+{% if leads %}
+  <div class="toolbar">
+    <div class="sub">
+      <b style="color:var(--text)">{{ leads | length }} leads</b>{% if leads | length != all_count %} (de {{ all_count }}){% endif %} ·
+      {{ verified }} con WhatsApp verificado · {{ to_test }} con celular para probar ·
+      {{ high_opportunity }} grandes oportunidades
+      {% if not ai_enabled %}<br>Análisis con IA apagado (sin clave en .env): se muestran los problemas detectados automáticamente, sin costo.{% endif %}
+    </div>
+    <div class="row-actions">
+      <form method="get" action="/" style="display:flex;gap:6px;align-items:center">
+        <input type="hidden" name="dia" value="{{ day.isoformat() }}">
+        {% for key in active %}<input type="hidden" name="filtro" value="{{ key }}">{% endfor %}
+        {% if search_query %}<input type="hidden" name="busqueda" value="{{ search_query }}">{% endif %}
+        <label class="sub">Ordenar
+          <select name="orden" onchange="this.form.submit()">
+            {% for key, label in sorts.items() %}
+              <option value="{{ key }}" {% if key == order %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </form>
+      {% if pending_reviews %}
+        <form method="post" action="/revisar-pendientes">
+          <input type="hidden" name="dia" value="{{ day.isoformat() }}">
+          <button class="btn" type="submit" title="Webs que abren pero todavía no se revisaron a fondo (por ejemplo, si detuviste la búsqueda)">
+            ↻ Revisar {{ pending_reviews | length }} webs pendientes</button>
+        </form>
+      {% endif %}
+      <a class="btn" href="{{ url('/exportar.csv') }}" title="Exporta lo que estás viendo, con los filtros puestos">⬇ Exportar CSV</a>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:26%">Negocio</th>
+        <th style="width:30%">WhatsApp</th>
+        <th style="width:26%">Web y problemas</th>
+        <th>Rating</th>
+        <th>Links</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lead in leads %}{% include "_row.html" %}{% endfor %}
+    </tbody>
+  </table>
+{% elif all_count %}
+  <div class="empty">Ningún lead de este día cumple los filtros elegidos. <a href="{{ url(search=None, clear=True) }}">Ver todos</a></div>
+{% else %}
+  <div class="empty">
+    {% if day == today %}
+      Todavía no hay leads hoy. Escribe una búsqueda arriba y pulsa <b>Buscar leads</b>.
+    {% else %}
+      No hay leads para este día.
+    {% endif %}
+  </div>
+{% endif %}
+{% if duplicates %}
+  <details class="more" style="margin-top:14px">
+    <summary>{{ duplicates | length }} repetidos ocultos (ya contactados, o con el mismo WhatsApp, teléfono, web o red que otro lead)</summary>
+    <table style="margin-top:6px">
+      {% for dup in duplicates %}
+        <tr>
+          <td style="width:26%"><a class="name" href="/negocio/{{ dup.id }}">{{ dup.name }}</a><br><span class="sub">{{ dup.query }}</span></td>
+          <td class="sub">{{ dup.reason }}</td>
+          <td style="white-space:nowrap">
+            <a class="btn small" href="{{ dup.maps_url }}" target="_blank" rel="noopener">Maps</a>
+            <button class="btn small" hx-post="/negocio/{{ dup.id }}/no-repetido" hx-swap="none"
+                    title="Si no es el mismo negocio, vuelve a la lista de leads">No es repetido</button>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </details>
+{% endif %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if result %}
+    <div class="ok-box">
+      Lista guardada: {{ result.added }} nuevos{% if result.updated %} y {{ result.updated }} actualizados (ya estaban){% endif %}.
+      Esos números nunca volverán a aparecer como leads.
+      {% if result.flagged %}
+        <br>{{ result.flagged | length }} leads que ya tenías guardados resultaron estar contactados y se ocultaron:
+        {{ result.flagged | map(attribute="business_name") | join(", ") }}.
+      {% endif %}
+    </div>
+    {% if result.invalid %}
+      <div class="notice">
+        {{ result.invalid | length }} líneas no tenían un número válido y no se guardaron. Quedaron en el cuadro de abajo para que las corrijas.
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <section class="panel">
+    <strong style="font-size:17px">Agregar a la lista de ya contactados</strong>
+    <p class="sub">
+      Copia las filas de tu planilla (nombre, teléfono, estado, hora, fecha…) y pégalas aquí. Puedes pegar la lista completa
+      todas las veces que quieras: los números que ya estaban solo se actualizan, no se duplican.
+    </p>
+    <form method="post" action="/contactados">
+      <textarea name="lista" rows="10" placeholder="Inmobiliaria Ejemplo	+56 9 1234 5678	contactado	3:15 pm	lunes 5 de octubre">{{ text }}</textarea>
+      <p style="margin:10px 0 0"><button class="btn primary" type="submit">Guardar lista</button></p>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="toolbar">
+      <strong style="font-size:17px">Ya contactados ({{ contacted | length }})</strong>
+      <span class="sub">Un negocio con cualquiera de estos números se salta en las búsquedas.</span>
+    </div>
+    {% if contacted %}
+      <table>
+        <thead><tr><th>Nombre</th><th>Número</th><th>Estado</th><th>Cuándo</th><th>Nota</th></tr></thead>
+        <tbody>
+          {% for lead in contacted %}
+            <tr>
+              <td class="name">{{ lead.name }}</td>
+              <td style="white-space:nowrap">{{ lead.phone_e164 | numero }}</td>
+              <td>{{ lead.status or "" }}</td>
+              <td class="sub">{{ lead.contacted_on or "" }}</td>
+              <td class="sub">{{ lead.note or "" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty">Todavía no hay contactados. Pega tu planilla arriba.</div>
+    {% endif %}
+  </section>
+{% endblock %}

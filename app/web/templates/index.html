@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if notice %}<div class="notice">{{ notice }}</div>{% endif %}
+
+  <section class="panel">
+    <form class="search" method="post" action="/buscar">
+      <input type="text" name="consulta" placeholder="¿Qué buscas? Ej: cerrajeros en Rancagua, peluquerías en Miami" required
+             {% if running %}disabled{% endif %}>
+      <label class="muted">Leads <input type="number" name="cantidad" value="{{ default_target }}" min="1" max="{{ max_target }}"
+             {% if running %}disabled{% endif %}></label>
+      <button class="btn primary" type="submit" {% if running %}disabled{% endif %}>Buscar leads</button>
+    </form>
+    <p class="sub" style="margin:10px 0 0">
+      Cuenta como lead un negocio con <b>web propia que abre</b> y con WhatsApp verificado o un celular para probar.
+      Se saltan los que no tienen web (o la tienen caída), los que ya revisaste otros días y los repetidos: mismo WhatsApp,
+      teléfono, web o red social que un lead anterior o que alguien de tu lista de <a href="/contactados">ya contactados</a>.
+      Al buscar se abre una ventana de Chromium con Google Maps: <b>no la cierres mientras busca</b> (puedes minimizarla).
+    </p>
+  </section>
+
+  {% include "_progress.html" %}
+  {% if reviews.total %}{% include "_reviews.html" %}{% endif %}
+
+  <section class="panel">
+    <div class="toolbar">
+      <div>
+        <strong style="font-size:17px">Leads del {{ day | fecha }}{% if day == today %} (hoy){% endif %}</strong>
+      </div>
+      <div class="days sub">
+        Días:
+        {% for d, total, queries in days %}
+          <a href="/?dia={{ d.isoformat() }}" class="{% if d == day %}current{% endif %}" title="{{ queries | join(', ') }}">{{ d | fecha }} ({{ total }})</a>
+        {% else %}
+          <span>todavía no hay búsquedas</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div id="leads" hx-get="{{ url('/leads') }}" hx-trigger="leads-actualizados from:body">
+      {% include "_leads.html" %}
+    </div>
+  </section>
+{% endblock %}

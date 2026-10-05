@@ -1,0 +1,9 @@
+<section class="panel" id="revisiones"
+  {% if reviews.running %}hx-get="/revisiones" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}>
+  {% if reviews.running %}
+    <span class="spinner"></span>
+    Revisando webs a fondo: {{ reviews.done }} de {{ reviews.total }}. La lista se actualiza sola.
+  {% else %}
+    Revisión de webs terminada: {{ reviews.done }} de {{ reviews.total }}{% if reviews.errors %} ({{ reviews.errors | length }} con error){% endif %}.
+  {% endif %}
+</section>

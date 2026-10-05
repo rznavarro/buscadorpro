@@ -1,0 +1,14 @@
+<div id="revision" class="stack"
+  {% if status %}hx-get="/negocio/{{ business.id }}/revision" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}>
+  {% if status == "revisando" %}
+    <span><span class="spinner"></span> Revisando la web… (tarda entre 20 segundos y 1 minuto; la página se actualiza sola)</span>
+  {% elif status == "en_cola" %}
+    <span><span class="spinner"></span> En cola: se revisa apenas termine la web anterior.</span>
+  {% elif business.website %}
+    <button class="btn" hx-post="/negocio/{{ business.id }}/reanalizar" hx-target="#revision" hx-swap="outerHTML"
+            title="Vuelve a revisar la web: si abre, su WhatsApp, capturas y problemas{% if ai_enabled %} y el análisis con IA{% endif %}">↻ Re-analizar web</button>
+    {% if error %}<span class="sub sev-alta">⚠ La última revisión falló: {{ error }}</span>{% endif %}
+  {% else %}
+    <span class="sub">No tiene web para revisar.</span>
+  {% endif %}
+</div>

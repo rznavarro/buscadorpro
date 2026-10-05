@@ -1,0 +1,34 @@
+[project]
+name = "vortexia-prospector"
+version = "0.1.0"
+description = "Agente de investigación comercial para Vortexia: encuentra negocios en Google Maps y analiza su presencia web."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "anthropic>=0.76.0",
+    "browser-use==0.13.10",
+    "fastapi>=0.142.2",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "phonenumbers>=9.0.40",
+    "playwright>=1.63.0",
+    "pydantic-settings>=2.15.0",
+    "python-multipart>=0.0.32",
+    "pyyaml>=6.0.3",
+    "selectolax>=1.0.0",
+    "sqlmodel>=0.0.47",
+    "truststore>=0.10.4",
+    "uvicorn>=0.54.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "browser: pruebas que abren un navegador real (correr con: uv run pytest -m browser)",
+]
+addopts = "-m 'not browser'"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
